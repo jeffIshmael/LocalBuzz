@@ -1,17 +1,21 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useAccount, useReadContract, useDisconnect } from "wagmi";
+import { useAccount, useReadContract, useDisconnect, useWriteContract } from "wagmi";
 import { contractAddress, contractAbi } from "@/config/Contract";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import Purchased from "@/components/Purchased";
 
 const ClientDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [viewProfile, setViewProfile] = useState(false);
-  const { address } = useAccount();
+  const { address , isConnected} = useAccount();
   const { disconnect } = useDisconnect();
   const router = useRouter();
+  const {writeContractAsync, error} = useWriteContract();
+  const [activeSection, setActiveSection] = useState('section');
 
   const { data } = useReadContract({
     address: contractAddress,
@@ -20,7 +24,7 @@ const ClientDashboard = () => {
     args: [address],
   });
 
-  const {data:token} = useReadContract({
+  const { data: token } = useReadContract({
     address: contractAddress,
     abi: contractAbi,
     functionName: "balanceOf",
@@ -43,6 +47,40 @@ const ClientDashboard = () => {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
+  const handleButtonClick = (sectionName:string) => {
+    setActiveSection(sectionName); // Update active section on dashboard
+  };
+
+  async function Redeem() {
+    if (!isConnected) {
+      toast.error("Please connect wallet");
+      return;
+    }
+    try {
+      
+  
+
+      if (token) {
+        const hash = await writeContractAsync({
+          address: contractAddress,
+          abi: contractAbi,
+          functionName: "redeemTokens",
+          args: [BigInt(Number(token))],
+        });
+
+        if (hash) {
+          toast.success("Purchase successful");
+        }
+      } else {
+        console.log(error);
+        toast.error("Purcse failed");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Purchase failed");
+    }
+  }
 
   const LogOut = () => {
     disconnect();
@@ -78,13 +116,13 @@ const ClientDashboard = () => {
             <ul className="mt-4">
               <span className="text-gray-400 font-bold">ADMIN</span>
               <li className="mb-1 group">
-                <Link
-                  href="#"
+                <button
+                  onClick={() => handleButtonClick('section')}
                   className="flex font-semibold items-center py-2 px-4 text-gray-900 hover:bg-gray-950 hover:text-gray-100 rounded-md group-[.active]:bg-gray-800 group-[.active]:text-white group-[.selected]:bg-gray-950 group-[.selected]:text-gray-100"
                 >
                   <i className="ri-home-2-line mr-3 text-lg"></i>
                   <span className="text-sm">Dashboard</span>
-                </Link>
+                </button>
               </li>
               <li className={`mb-1 group ${isOpen ? "selected" : ""}`}>
                 <Link
@@ -102,26 +140,26 @@ const ClientDashboard = () => {
                 </Link>
                 <ul className={`pl-7 mt-2 ${isOpen ? "block" : "hidden"}`}>
                   <li className="mb-4">
-                    <Link
-                      href="#"
+                    <button
+                      onClick={() => handleButtonClick('packages')}
                       className="text-gray-900 text-sm flex items-center hover:text-[#f84525] before:contents-[''] before:w-1 before:h-1 before:rounded-full before:bg-gray-300 before:mr-3"
                     >
                       Open contracts
-                    </Link>
+                    </button>
                   </li>
                   <li className="mb-4">
-                    <Link
-                      href="#"
+                    <button
+                      onClick={() => handleButtonClick('packages')}
                       className="text-gray-900 text-sm flex items-center hover:text-[#f84525] before:contents-[''] before:w-1 before:h-1 before:rounded-full before:bg-gray-300 before:mr-3"
                     >
                       All contracts
-                    </Link>
+                    </button>
                   </li>
                 </ul>
               </li>
               <li className="mb-1 group">
                 <Link
-                  href="#"
+                  href="/explore"
                   className="flex font-semibold items-center py-2 px-4 text-gray-900 hover:bg-gray-950 hover:text-gray-100 rounded-md group-[.active]:bg-gray-800 group-[.active]:text-white group-[.selected]:bg-gray-950 group-[.selected]:text-gray-100"
                 >
                   <i className="bx bx-archive mr-3 text-lg"></i>
@@ -168,301 +206,7 @@ const ClientDashboard = () => {
           />
 
           <ul className="ml-auto flex items-center">
-            <li className="mr-1 dropdown">
-              <button
-                type="button"
-                className="dropdown-toggle text-gray-400 mr-4 w-8 h-8 rounded flex items-center justify-center  hover:text-gray-600"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  className="hover:bg-gray-100 rounded-full"
-                  viewBox="0 0 24 24"
-                  //   style="fill: gray;transform: ;msFilter:;"
-                  // style={{ fill: "gray", transform: "", msFilter: "" }}
-                >
-                  <path d="M19.023 16.977a35.13 35.13 0 0 1-1.367-1.384c-.372-.378-.596-.653-.596-.653l-2.8-1.337A6.962 6.962 0 0 0 16 9c0-3.859-3.14-7-7-7S2 5.141 2 9s3.14 7 7 7c1.763 0 3.37-.66 4.603-1.739l1.337 2.8s.275.224.653.596c.387.363.896.854 1.384 1.367l1.358 1.392.604.646 2.121-2.121-.646-.604c-.379-.372-.885-.866-1.391-1.36zM9 14c-2.757 0-5-2.243-5-5s2.243-5 5-5 5 2.243 5 5-2.243 5-5 5z"></path>
-                </svg>
-              </button>
-              <div className="dropdown-menu shadow-md shadow-black/5 z-30 hidden max-w-xs w-full bg-white rounded-md border border-gray-100">
-                <form action="" className="p-4 border-b border-b-gray-100">
-                  <div className="relative w-full">
-                    <input
-                      type="text"
-                      className="py-2 pr-4 pl-10 bg-gray-50 w-full outline-none border border-gray-100 rounded-md text-sm focus:border-blue-500"
-                      placeholder="Search..."
-                    />
-                    <i className="ri-search-line absolute top-1/2 left-4 -translate-y-1/2 text-gray-900"></i>
-                  </div>
-                </form>
-              </div>
-            </li>
-            <li className="dropdown">
-              <button
-                type="button"
-                className="dropdown-toggle text-gray-400 mr-4 w-8 h-8 rounded flex items-center justify-center  hover:text-gray-600"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  className="hover:bg-gray-100 rounded-full"
-                  viewBox="0 0 24 24"
-                  //   style="fill: gray;transform: ;msFilter:;"
-                  // style={{ fill: "gray", transform: "", msFilter: "" }}
-                >
-                  <path d="M19 13.586V10c0-3.217-2.185-5.927-5.145-6.742C13.562 2.52 12.846 2 12 2s-1.562.52-1.855 1.258C7.185 4.074 5 6.783 5 10v3.586l-1.707 1.707A.996.996 0 0 0 3 16v2a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-2a.996.996 0 0 0-.293-.707L19 13.586zM19 17H5v-.586l1.707-1.707A.996.996 0 0 0 7 14v-4c0-2.757 2.243-5 5-5s5 2.243 5 5v4c0 .266.105.52.293.707L19 16.414V17zm-7 5a2.98 2.98 0 0 0 2.818-2H9.182A2.98 2.98 0 0 0 12 22z"></path>
-                </svg>
-              </button>
-              <div className="dropdown-menu shadow-md shadow-black/5 z-30 hidden max-w-xs w-full bg-white rounded-md border border-gray-100">
-                <div className="flex items-center px-4 pt-4 border-b border-b-gray-100 notification-tab">
-                  <button
-                    type="button"
-                    data-tab="notification"
-                    data-tab-page="notifications"
-                    className="text-gray-400 font-medium text-[13px] hover:text-gray-600 border-b-2 border-b-transparent mr-4 pb-1 active"
-                  >
-                    Notifications
-                  </button>
-                  <button
-                    type="button"
-                    data-tab="notification"
-                    data-tab-page="messages"
-                    className="text-gray-400 font-medium text-[13px] hover:text-gray-600 border-b-2 border-b-transparent mr-4 pb-1"
-                  >
-                    Messages
-                  </button>
-                </div>
-                <div className="my-2">
-                  <ul
-                    className="max-h-64 overflow-y-auto"
-                    data-tab-for="notification"
-                    data-page="notifications"
-                  >
-                    <li>
-                      <Link
-                        href="#"
-                        className="py-2 px-4 flex items-center hover:bg-gray-50 group"
-                      >
-                        <img
-                          src="https://placehold.co/32x32"
-                          alt=""
-                          className="w-8 h-8 rounded block object-cover align-middle"
-                        />
-                        <div className="ml-2">
-                          <div className="text-[13px] text-gray-600 font-medium truncate group-hover:text-blue-500">
-                            New order
-                          </div>
-                          <div className="text-[11px] text-gray-400">
-                            from a user
-                          </div>
-                        </div>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="py-2 px-4 flex items-center hover:bg-gray-50 group"
-                      >
-                        <img
-                          src="https://placehold.co/32x32"
-                          alt=""
-                          className="w-8 h-8 rounded block object-cover align-middle"
-                        />
-                        <div className="ml-2">
-                          <div className="text-[13px] text-gray-600 font-medium truncate group-hover:text-blue-500">
-                            New order
-                          </div>
-                          <div className="text-[11px] text-gray-400">
-                            from a user
-                          </div>
-                        </div>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="py-2 px-4 flex items-center hover:bg-gray-50 group"
-                      >
-                        <img
-                          src="https://placehold.co/32x32"
-                          alt=""
-                          className="w-8 h-8 rounded block object-cover align-middle"
-                        />
-                        <div className="ml-2">
-                          <div className="text-[13px] text-gray-600 font-medium truncate group-hover:text-blue-500">
-                            New order
-                          </div>
-                          <div className="text-[11px] text-gray-400">
-                            from a user
-                          </div>
-                        </div>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="py-2 px-4 flex items-center hover:bg-gray-50 group"
-                      >
-                        <img
-                          src="https://placehold.co/32x32"
-                          alt=""
-                          className="w-8 h-8 rounded block object-cover align-middle"
-                        />
-                        <div className="ml-2">
-                          <div className="text-[13px] text-gray-600 font-medium truncate group-hover:text-blue-500">
-                            New order
-                          </div>
-                          <div className="text-[11px] text-gray-400">
-                            from a user
-                          </div>
-                        </div>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="py-2 px-4 flex items-center hover:bg-gray-50 group"
-                      >
-                        <img
-                          src="https://placehold.co/32x32"
-                          alt=""
-                          className="w-8 h-8 rounded block object-cover align-middle"
-                        />
-                        <div className="ml-2">
-                          <div className="text-[13px] text-gray-600 font-medium truncate group-hover:text-blue-500">
-                            New order
-                          </div>
-                          <div className="text-[11px] text-gray-400">
-                            from a user
-                          </div>
-                        </div>
-                      </Link>
-                    </li>
-                  </ul>
-                  <ul
-                    className="max-h-64 overflow-y-auto hidden"
-                    data-tab-for="notification"
-                    data-page="messages"
-                  >
-                    <li>
-                      <Link
-                        href="#"
-                        className="py-2 px-4 flex items-center hover:bg-gray-50 group"
-                      >
-                        <img
-                          src="https://placehold.co/32x32"
-                          alt=""
-                          className="w-8 h-8 rounded block object-cover align-middle"
-                        />
-                        <div className="ml-2">
-                          <div className="text-[13px] text-gray-600 font-medium truncate group-hover:text-blue-500">
-                            John Doe
-                          </div>
-                          <div className="text-[11px] text-gray-400">
-                            Hello there!
-                          </div>
-                        </div>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="py-2 px-4 flex items-center hover:bg-gray-50 group"
-                      >
-                        <img
-                          src="https://placehold.co/32x32"
-                          alt=""
-                          className="w-8 h-8 rounded block object-cover align-middle"
-                        />
-                        <div className="ml-2">
-                          <div className="text-[13px] text-gray-600 font-medium truncate group-hover:text-blue-500">
-                            John Doe
-                          </div>
-                          <div className="text-[11px] text-gray-400">
-                            Hello there!
-                          </div>
-                        </div>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="py-2 px-4 flex items-center hover:bg-gray-50 group"
-                      >
-                        <img
-                          src="https://placehold.co/32x32"
-                          alt=""
-                          className="w-8 h-8 rounded block object-cover align-middle"
-                        />
-                        <div className="ml-2">
-                          <div className="text-[13px] text-gray-600 font-medium truncate group-hover:text-blue-500">
-                            John Doe
-                          </div>
-                          <div className="text-[11px] text-gray-400">
-                            Hello there!
-                          </div>
-                        </div>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="py-2 px-4 flex items-center hover:bg-gray-50 group"
-                      >
-                        <img
-                          src="https://placehold.co/32x32"
-                          alt=""
-                          className="w-8 h-8 rounded block object-cover align-middle"
-                        />
-                        <div className="ml-2">
-                          <div className="text-[13px] text-gray-600 font-medium truncate group-hover:text-blue-500">
-                            John Doe
-                          </div>
-                          <div className="text-[11px] text-gray-400">
-                            Hello there!
-                          </div>
-                        </div>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="py-2 px-4 flex items-center hover:bg-gray-50 group"
-                      >
-                        <img
-                          src="https://placehold.co/32x32"
-                          alt=""
-                          className="w-8 h-8 rounded block object-cover align-middle"
-                        />
-                        <div className="ml-2">
-                          <div className="text-[13px] text-gray-600 font-medium truncate group-hover:text-blue-500">
-                            John Doe
-                          </div>
-                          <div className="text-[11px] text-gray-400">
-                            Hello there!
-                          </div>
-                        </div>
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </li>
-            <button id="fullscreen-button">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                className="hover:bg-gray-100 rounded-full"
-                viewBox="0 0 24 24"
-                // style="fill: gray;transform: ;msFilter:;"
-                // style={{ fill: "gray", transform: "", msFilter: "" }}
-              >
-                <path d="M5 5h5V3H3v7h2zm5 14H5v-5H3v7h7zm11-5h-2v5h-5v2h7zm-2-4h2V3h-7v2h5z"></path>
-              </svg>
-            </button>
+           
 
             <li className="dropdown ml-3">
               <button
@@ -545,13 +289,16 @@ const ClientDashboard = () => {
         {/* <!-- end navbar -->
 
       <!-- Content --> */}
-        <div className="p-6">
+      {activeSection === 'section' && (<div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             <div className="bg-white rounded-md border border-gray-100 p-6 shadow-md shadow-black/5">
               <div className="flex justify-between mb-6">
                 <div>
                   <div className="flex items-center mb-1">
-                    <div className="text-2xl font-semibold">{Number(token)}</div>
+                    <h1 className="text-2xl font-semibold">
+                      {Number(token) / 10 ** 18}{" "}
+                      <span className="text-gray-500"> Buzz </span>{" "}
+                    </h1>
                   </div>
                   <div className="text-sm font-medium text-gray-400">
                     Token balance
@@ -559,51 +306,11 @@ const ClientDashboard = () => {
                 </div>
 
                 <div className="mt-2 ml-16">
-                  <button className="bg-green-500 hover:bg-green-400 text-white font-bold p-1 rounded">
+                  <button onClick={Redeem} className="bg-green-500 hover:bg-green-400 text-white font-bold p-1 rounded">
                     Redeem
                   </button>
                 </div>
-
-                <div className="dropdown">
-                  <button
-                    type="button"
-                    className="dropdown-toggle text-gray-400 hover:text-gray-600"
-                  >
-                    <i className="ri-more-fill"></i>
-                  </button>
-                  <ul className="dropdown-menu shadow-md shadow-black/5 z-30 hidden py-1.5 rounded-md bg-white border border-gray-100 w-full max-w-[140px]">
-                    <li>
-                      <Link
-                        href="#"
-                        className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                      >
-                        Profile
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                      >
-                        Settings
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                      >
-                        Logout
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
               </div>
-
-              <Link
-                href="#"
-                className="text-[#f84525] font-medium text-sm hover:text-red-800"
-              ></Link>
             </div>
             <div className="bg-white rounded-md border border-gray-100 p-6 shadow-md shadow-black/5">
               <div className="flex justify-between mb-4">
@@ -618,45 +325,7 @@ const ClientDashboard = () => {
                     Open Contracts
                   </div>
                 </div>
-                <div className="dropdown">
-                  <button
-                    type="button"
-                    className="dropdown-toggle text-gray-400 hover:text-gray-600"
-                  >
-                    <i className="ri-more-fill"></i>
-                  </button>
-                  <ul className="dropdown-menu shadow-md shadow-black/5 z-30 hidden py-1.5 rounded-md bg-white border border-gray-100 w-full max-w-[140px]">
-                    <li>
-                      <Link
-                        href="#"
-                        className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                      >
-                        Profile
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                      >
-                        Settings
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                      >
-                        Logout
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
               </div>
-              <Link
-                href="#"
-                className="text-[#f84525] font-medium text-sm hover:text-red-800"
-              ></Link>
             </div>
             <div className="bg-white rounded-md border border-gray-100 p-6 shadow-md shadow-black/5">
               <div className="flex justify-between mb-6">
@@ -668,40 +337,7 @@ const ClientDashboard = () => {
                     All Contracts
                   </div>
                 </div>
-                <div className="dropdown">
-                  <button
-                    type="button"
-                    className="dropdown-toggle text-gray-400 hover:text-gray-600"
-                  >
-                    <i className="ri-more-fill"></i>
-                  </button>
-                  <ul className="dropdown-menu shadow-md shadow-black/5 z-30 hidden py-1.5 rounded-md bg-white border border-gray-100 w-full max-w-[140px]">
-                    <li>
-                      <Link
-                        href="#"
-                        className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                      >
-                        Profile
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                      >
-                        Settings
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                      >
-                        Logout
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
+                
               </div>
             </div>
           </div>
@@ -709,40 +345,7 @@ const ClientDashboard = () => {
             <div className="bg-white border border-gray-100 shadow-md shadow-black/5 p-6 rounded-md">
               <div className="flex justify-between mb-4 items-start">
                 <div className="font-medium">Payments</div>
-                <div className="dropdown">
-                  <button
-                    type="button"
-                    className="dropdown-toggle text-gray-400 hover:text-gray-600"
-                  >
-                    <i className="ri-more-fill"></i>
-                  </button>
-                  <ul className="dropdown-menu shadow-md shadow-black/5 z-30 hidden py-1.5 rounded-md bg-white border border-gray-100 w-full max-w-[140px]">
-                    <li>
-                      <Link
-                        href="#"
-                        className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                      >
-                        Profile
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                      >
-                        Settings
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                      >
-                        Logout
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
+                
               </div>
               <div className="overflow-hidden">
                 <table className="w-full min-w-[540px]">
@@ -769,40 +372,6 @@ const ClientDashboard = () => {
                         </span>
                       </td>
                       <td className="py-2 px-4 border-b border-b-gray-50">
-                        <div className="dropdown">
-                          <button
-                            type="button"
-                            className="dropdown-toggle text-gray-400 hover:text-gray-600 text-sm w-6 h-6 rounded flex items-center justify-center bg-gray-50"
-                          >
-                            <i className="ri-more-2-fill"></i>
-                          </button>
-                          <ul className="dropdown-menu shadow-md shadow-black/5 z-30 hidden py-1.5 rounded-md bg-white border border-gray-100 w-full max-w-[140px]">
-                            <li>
-                              <Link
-                                href="#"
-                                className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                              >
-                                Profile
-                              </Link>
-                            </li>
-                            <li>
-                              <Link
-                                href="#"
-                                className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                              >
-                                Settings
-                              </Link>
-                            </li>
-                            <li>
-                              <Link
-                                href="#"
-                                className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                              >
-                                Logout
-                              </Link>
-                            </li>
-                          </ul>
-                        </div>
                       </td>
                     </tr>
                     <tr>
@@ -827,40 +396,7 @@ const ClientDashboard = () => {
                         </span>
                       </td>
                       <td className="py-2 px-4 border-b border-b-gray-50">
-                        <div className="dropdown">
-                          <button
-                            type="button"
-                            className="dropdown-toggle text-gray-400 hover:text-gray-600 text-sm w-6 h-6 rounded flex items-center justify-center bg-gray-50"
-                          >
-                            <i className="ri-more-2-fill"></i>
-                          </button>
-                          <ul className="dropdown-menu shadow-md shadow-black/5 z-30 hidden py-1.5 rounded-md bg-white border border-gray-100 w-full max-w-[140px]">
-                            <li>
-                              <Link
-                                href="#"
-                                className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                              >
-                                Profile
-                              </Link>
-                            </li>
-                            <li>
-                              <Link
-                                href="#"
-                                className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                              >
-                                Settings
-                              </Link>
-                            </li>
-                            <li>
-                              <Link
-                                href="#"
-                                className="flex items-center text-[13px] py-1.5 px-4 text-gray-600 hover:text-blue-500 hover:bg-gray-50"
-                              >
-                                Logout
-                              </Link>
-                            </li>
-                          </ul>
-                        </div>
+                        
                       </td>
                     </tr>
                   </tbody>
@@ -868,7 +404,10 @@ const ClientDashboard = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div>)}
+
+      {activeSection === 'packages' && (<Purchased />)}
+        
 
         {/* <!-- End Content --> */}
       </main>

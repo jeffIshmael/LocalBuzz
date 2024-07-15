@@ -2,13 +2,16 @@ import { useRouter } from "next/router";
 import { contractAddress, contractAbi } from "@/config/Contract";
 import { useReadContract, useWriteContract, useAccount } from "wagmi";
 import Header from "@/components/Header";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
+import { processCheckout } from "@/config/TokenFunction";
+import Link from "next/link";
 
 export default function CreatorDetails() {
   const router = useRouter();
   const { id } = router.query;
   const { isConnected } = useAccount();
+  const { writeContractAsync } = useWriteContract();
 
   const { data: creatorData } = useReadContract({
     address: contractAddress,
@@ -17,7 +20,7 @@ export default function CreatorDetails() {
     args: [id],
   });
 
-  const { writeContractAsync } = useWriteContract();
+  console.log(creatorData);
 
   const creator = (creatorData as Creator) || {};
 
@@ -45,10 +48,14 @@ export default function CreatorDetails() {
     platform: string;
   }
 
-  const [packdetails, setPackdetails] = useState<PackageDetails | null>(null);
+  interface PackageId {
+    id: number;
+  }
+
+  const creatorAddress = creator.walletAddress as `0x${string}`;
   const address = creator.walletAddress;
 
-  const { data: packageIds, refetch: refetchPackageIds } = useReadContract({
+  const { data: packageIdsdata } = useReadContract({
     address: contractAddress,
     abi: contractAbi,
     functionName: "getCreatorPackages",
@@ -56,41 +63,26 @@ export default function CreatorDetails() {
     // enabled: false, // disable automatic fetching
   });
 
-  useEffect(() => {
-    if (address) {
-      refetchPackageIds();
-    }
-  }, [address, refetchPackageIds]);
+  const packageIds = (packageIdsdata as PackageId[]) || [];
 
-  const createdPackages = (packageIds as { id: number }[]) || [];
-  const packageId = createdPackages[0]?.id || 0;
+  console.log(packageIds);
 
-  const { refetch: refetchPackageDetails } = useReadContract({
+  const { data, refetch } = useReadContract({
     address: contractAddress,
     abi: contractAbi,
     functionName: "getPackage",
-    args: [BigInt(packageId)],
-     // disable automatic fetching
+    args: [packageIds],
   });
 
+  const packdetails = (data as PackageDetails) || [];
+
+  console.log(packdetails);
+
   useEffect(() => {
-    const fetchPackages = async () => {
-      if (createdPackages.length === 0) return;
-      
-
-      // const packageId = createdPackages[0].id; // Assuming you want the first package
-
-      const { data } = await refetchPackageDetails(
-        // {options: { args: [BigInt(packageId)] },
-        // enabled: false,
-      // }
-    );
-
-      setPackdetails(data as PackageDetails);
-    };
-
-    fetchPackages();
-  }, [createdPackages, refetchPackageDetails]);
+    if (packdetails) {
+      console.log(packdetails);
+    }
+  }, [packdetails]);
 
   async function Purchase() {
     if (!isConnected) {
@@ -98,24 +90,28 @@ export default function CreatorDetails() {
       return;
     }
 
-    if (!packdetails) {
-      toast.error("Package details not available");
-      return;
-    }
-
     try {
-      const hash = await writeContractAsync({
-        address: contractAddress,
-        abi: contractAbi,
-        functionName: "purchasePackage",
-        args: [packdetails.packageId],
-      });
+      const isCheckoutProcessed = await processCheckout(
+        creatorAddress,
+        Number(packdetails?.price)
+      );
 
-      if (hash) {
-        toast.success("Successfully purchased");
+      if (isCheckoutProcessed) {
+        const hash = await writeContractAsync({
+          address: contractAddress,
+          abi: contractAbi,
+          functionName: "purchasePackage",
+          args: [0],
+        });
+
+        if (hash) {
+          toast.success("Purchase successful");
+        }
+      } else {
+        toast.error("Purchase failed");
       }
-    } catch (e: any) {
-      toast.error("Failed to purchase, try again.");
+    } catch (error) {
+      toast.error("Purchase failed");
     }
   }
 
@@ -161,10 +157,12 @@ export default function CreatorDetails() {
               {" "}
               Connect
             </button>
-            <button className="text-white py-2 px-4 uppercase rounded bg-gray-700 hover:bg-gray-800 shadow hover:shadow-lg font-medium transition transform hover:-translate-y-0.5">
-              {" "}
-              Message
-            </button>
+            <Link href={`mailto:${creator?.email}`}>
+              <button className="text-white py-2 px-4 uppercase rounded bg-gray-700 hover:bg-gray-800 shadow hover:shadow-lg font-medium transition transform hover:-translate-y-0.5">
+                {" "}
+                Message
+              </button>
+            </Link>
           </div>
         </div>
         <div className="mt-20 text-center border-b pb-12">
@@ -183,101 +181,107 @@ export default function CreatorDetails() {
           <div>
             <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-center md:gap-8">
-                {createdPackages.length === 0 ? (
+                {packageIds?.length === 0 ? (
                   <h1 className="text-black text-center font-medium lg:px-16">
                     No Packages yet
                   </h1>
                 ) : (
-                  <div className="rounded-2xl border border-orange-600 p-6 shadow-sm ring-1 ring-orange-600 sm:order-last sm:px-8 lg:p-12">
-                    <div className="text-center">
-                      <h2 className="text-lg font-medium text-gray-900">
-                        <span className="sr-only"></span>
-                      </h2>
+                  
+                      <div  className="rounded-2xl border border-orange-600 p-6 shadow-sm ring-1 ring-orange-600 sm:order-last sm:px-8 lg:p-12">
+                        <div className="text-center">
+                          <h2 className="text-lg font-medium text-gray-900">
+                            <span className="sr-only"></span>
+                          </h2>
 
-                      <p className="mt-2 sm:mt-4">
-                        <strong className="text-3xl font-bold text-gray-900 sm:text-4xl">
-                          {" "}
-                          {packdetails ? Number(packdetails.price) : 0}{" "}
-                        </strong>
+                          <p className="mt-2 sm:mt-4">
+                            <strong className="text-3xl font-bold text-gray-900 sm:text-4xl">
+                              {" "}
+                              {Number(packdetails?.price) / 10 ** 18}{" "}
+                            </strong>
 
-                        <span className="text-base font-medium text-gray-700">cUSD </span>
-                      </p>
-                    </div>
+                            <span className="text-base font-medium text-gray-700">
+                              cUSD{" "}
+                            </span>
+                          </p>
+                        </div>
 
-                    <h1 className="text-center text-lg font-normal mt-2">{packdetails?.name}</h1>
+                        <h1 className="text-center text-lg font-normal mt-2">
+                          {packdetails?.name}
+                        </h1>
 
-                    <ul className="mt-2 space-y-2">
-                      <li className="flex items-center gap-1">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="size-5 text-orange-700"
+                        <ul className="mt-2 space-y-2">
+                          <li className="flex items-center gap-1">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth="1.5"
+                              stroke="currentColor"
+                              className="size-5 text-orange-700"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M4.5 12.75l6 6 9-13.5"
+                              />
+                            </svg>
+
+                            <span className="text-gray-700">
+                              {" "}
+                              {packdetails?.description}{" "}
+                            </span>
+                          </li>
+
+                          <li className="flex items-center gap-1">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth="1.5"
+                              stroke="currentColor"
+                              className="size-5 text-orange-700"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M4.5 12.75l6 6 9-13.5"
+                              />
+                            </svg>
+
+                            <span className="text-gray-700">
+                              {packdetails?.platform}
+                            </span>
+                          </li>
+
+                          <li className="flex items-center gap-1">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth="1.5"
+                              stroke="currentColor"
+                              className="size-5 text-orange-700"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M4.5 12.75l6 6 9-13.5"
+                              />
+                            </svg>
+
+                            <span className="text-gray-700">
+                              {Number(packdetails?.duration)} days
+                            </span>
+                          </li>
+                        </ul>
+                        <button
+                          onClick={Purchase}
+                          className="mt-8 block rounded-full border border-orange-600 bg-orange-600 px-12 py-3 text-center text-sm font-medium text-white hover:bg-orange-700 hover:ring-1 hover:ring-orange-700 focus:outline-none focus:ring active:text-orange-500"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M4.5 12.75l6 6 9-13.5"
-                          />
-                        </svg>
-
-                        <span className="text-gray-700">
-                          {" "}
-                          {packdetails?.description}{" "}
-                        </span>
-                      </li>
-
-                      <li className="flex items-center gap-1">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="size-5 text-orange-700"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M4.5 12.75l6 6 9-13.5"
-                          />
-                        </svg>
-
-                        <span className="text-gray-700">
-                          {packdetails?.platform}
-                        </span>
-                      </li>
-
-                      <li className="flex items-center gap-1">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="size-5 text-orange-700"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M4.5 12.75l6 6 9-13.5"
-                          />
-                        </svg>
-
-                        <span className="text-gray-700">
-                          {Number(packdetails?.platform)} days
-                        </span>
-                      </li>
-                    </ul>
-                    <button
-                      onClick={Purchase}
-                      className="mt-8 block rounded-full border border-orange-600 bg-orange-600 px-12 py-3 text-center text-sm font-medium text-white hover:bg-orange-700 hover:ring-1 hover:ring-orange-700 focus:outline-none focus:ring active:text-orange-500"
-                    >
-                      Pay
-                    </button>
-                  </div>
+                          Pay
+                        </button>
+                      </div>
+                    
                 )}
               </div>
             </div>

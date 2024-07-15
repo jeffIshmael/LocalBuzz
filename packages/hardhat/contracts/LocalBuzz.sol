@@ -11,17 +11,14 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract LocalBuzz is ERC20{
 
-    // address public cUSDTokenAddress;
     IERC20 public cUSDToken;
-    address public owner;
+       
+    // address public cUSDTokenAddress = // 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1
+    constructor() ERC20("LocalBuzz", "BUZZ") {
     
-    //address public cUSDTokenAddress = // 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1
-    constructor() ERC20("LocalBuzz", "LBUZZ") {
-    // cUSDTokenAddress = _cUSDTokenAddress;
     cUSDToken = IERC20(0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1);
-    owner = msg.sender;
+    
     }
-
 
     uint  totalClients;
     uint totalCreators;
@@ -85,16 +82,13 @@ contract LocalBuzz is ERC20{
 
     //events
     event clientRegistered(uint id, string username, string email, address walletAddress, uint[] purchasedIds, uint tokenBalance);
-    event contentCreatorRegistered (uint id, string fullname, string username, string bio, string instagramLink, string facebookLink, string linkedinLink, string twitterLink, string tiktokLink,uint [] packagesCreated, address walletAddress, string email);
+    event contentCreatorRegistered (uint id, string fullname, string username, string bio, string instagramLink, string facebookLink, string linkedinLink, string twitterLink, string tiktokLink,uint [] packagesCreated,  address walletAddress, string email);
     event packageCreated (uint id, string name, string platform, string description, uint duration, uint price, address creator, address [] buyers);
     event packagePurchased (uint id, address buyer, uint amount);
     event TokensRewarded(address clientAddress, uint tokenAmount);
     event TokensRedeemed(address , uint TokenAmount);
+    event packageDeleted(uint id);
     event packageEdited(uint id, string name, string platform, string description, uint duration, uint price, address creator);
-    event cUSDWithdrawn(address _address, uint amount);
-    event cUSDSent(address _address, uint amount);
-    event cUSDDeposited(address _address, uint amount);
-
 
     //function to register Client
     function registerClient(string memory _username, string memory _email) public {
@@ -118,18 +112,19 @@ contract LocalBuzz is ERC20{
         string memory _facebookLink,
         string memory _linkedinLink,
         string memory _twitterLink,
+        
         string memory _tiktokLink,
         string memory _email
     ) public {
         require(!registered(msg.sender), "Already registered");
         require(!isContentCreator(msg.sender), "Already registered as client");
         uint id = totalCreators;
-        ContentCreator memory newCreator = ContentCreator(id, _fullname, _username, _bio, _instagramLink, _facebookLink, _linkedinLink, _twitterLink, _tiktokLink, new uint[](0) , msg.sender, _email);
+        ContentCreator memory newCreator = ContentCreator(id, _fullname, _username, _bio, _instagramLink, _facebookLink, _linkedinLink, _twitterLink, _tiktokLink, new uint[](0) ,  msg.sender, _email);
         creatornId[id] = newCreator;
         creatornAdd[msg.sender] = newCreator;
         creators.push(newCreator);
         totalCreators++;
-        emit contentCreatorRegistered(id, _fullname, _username, _bio, _instagramLink, _facebookLink, _linkedinLink, _twitterLink, _tiktokLink, new uint[](0), msg.sender, _email);
+        emit contentCreatorRegistered(id, _fullname, _username, _bio, _instagramLink, _facebookLink, _linkedinLink, _twitterLink, _tiktokLink, new uint[](0),  msg.sender, _email);
     }
 
     //function to create package
@@ -141,7 +136,7 @@ contract LocalBuzz is ERC20{
         uint _price
     ) public onlyCreator {
         uint id = totalPackages;
-        Package memory newPackage = Package(id, _name, _platform, _description, _duration, _price, msg.sender, new address[](0));
+        Package memory newPackage = Package(id, _name, _platform, _description, _duration, _price * 10 ** 18 , msg.sender, new address[](0));
         packagenId[id] = newPackage;
         packagenAdd[msg.sender] = newPackage;
         creatornAdd[msg.sender].packagesCreated.push(id);
@@ -157,22 +152,20 @@ contract LocalBuzz is ERC20{
         packagenId[_id].platform = _platform;
         packagenId[_id].description = _description;
         packagenId[_id].duration = _duration;
-        packagenId[_id].price = _price;
+        packagenId[_id].price = _price * 10 ** 18;
         emit packageEdited(_id, _name, _platform, _description, _duration, _price, msg.sender);
     }
 
+    //function to delete package
+    function deletePackage(uint _id) public onlyCreator {
+        require(packagenId[_id].creator == msg.sender, "Only the creator can delete the package");
+        delete packagenId[_id];
+        emit packageDeleted(_id);
+    }
+
     //function to purchase package
-    function purchasePackage(uint _id) public payable {
-        
-        uint amount = packagenId[_id].price * (10 ** 18);
-        address creatorAdd = packagenId[_id].creator;
-        require(cUSDToken.transfer( creatorAdd , amount), "Failed to send cUSD");
-        // require(cUSDToken.balanceOf(msg.sender) >= Amount, "Insufficient balance");
-        // require(cUSDToken.approve(msg.sender, Amount), "cannot approve");
-        // require(cUSDToken.transfer(creatorAdd, Amount), "Unable to send cUSD");
-        // require(msg.value >= Amount, "Insufficient balance");
-        // (bool sent, ) = creatorAdd.call{value: Amount}("");
-        // require(sent, "Failed to send Ether");
+    function purchasePackage(uint _id) public  { 
+        uint amount = packagenId[_id].price ;        
         clientnAdd[msg.sender].purchasedIds.push(_id);
         packagenId[_id].buyers.push(msg.sender); 
         //get the BUZZ token of 10% on amount spent       
@@ -180,7 +173,7 @@ contract LocalBuzz is ERC20{
         emit packagePurchased(_id, msg.sender, amount);
 
     }
-    //function to reward tokens
+    //function to reward tokens i.e Buzz
     function rewardTokens(address _clientAddress, uint _amount) internal {
         uint tokenAmount = _amount / 10; // i.e 10% of the purchase amount in tokens
         _mint(_clientAddress , tokenAmount);
@@ -188,38 +181,29 @@ contract LocalBuzz is ERC20{
     }
 
     //function to redeem tokens
-    function redeemTokens ( uint256 _tokenAmount) public payable  {
-        require(balanceOf(msg.sender) >= _tokenAmount, "Insufficient token balance");
+    function redeemTokens ( uint256 _tokenAmount) public {
         uint cUSDAmount = _tokenAmount;
         _burn(msg.sender, _tokenAmount);
-        sendcUSD(cUSDAmount);
+        require(cUSDToken.transfer(msg.sender, cUSDAmount),"Failed to process payout");
         emit TokensRedeemed(msg.sender, cUSDAmount);
     }
 
-    //functionto check balance of Buzz tokens
+    //function to check balance of Buzz tokens
     function balanceOf(address _client) public view override returns (uint256) {
         return super.balanceOf(_client);
     }
 
-    //function to send cUSD to redeeming client
-    function sendcUSD(uint _amount) public payable {
-        require(cUSDToken.balanceOf(address(this)) >= _amount, "Insufficient cUSD balance in contract");
-        require(cUSDToken.approve(msg.sender, _amount), "cUSD approval failed");
-        require(cUSDToken.transfer(msg.sender, _amount), "cUSD transfer failed");
-        emit cUSDSent(msg.sender, _amount);
+    //function to process purchase
+    function processPurchase(uint256 _id) public returns (bool) {
+        uint payout = packagenId[_id].price;
+        address receiver = packagenId[_id].creator;
+        require(cUSDToken.transfer(receiver, payout),"Failed to process payout");
+        return true;
     }
 
-    //function to withdraw cUSD from the contract
-    function withdrawcUSD(uint _amount) public onlyOwner {
-        require(cUSDToken.balanceOf(address(this)) >= _amount, "Insufficient cUSD balance in contract");
-        require(cUSDToken.transfer(msg.sender, _amount), "cUSD transfer failed");
-        emit cUSDWithdrawn(msg.sender, _amount);
-    }
-
-    //function to deposit cUSD to the contract
-    function depositcUSD(uint _amount) public {
-        require(cUSDToken.transferFrom(msg.sender, address(this), _amount), "cUSD transfer failed");
-        emit cUSDDeposited(msg.sender, _amount);
+    //funcion to get all creators packages
+    function getCreatorPackages(address _creatorAddress) public view returns (uint[] memory) {
+        return creatornAdd[_creatorAddress].packagesCreated;
     }
 
     //function to get client from address
@@ -243,18 +227,9 @@ contract LocalBuzz is ERC20{
     }
 
     //function to get package from id
-    function getPackage(uint _id) public view returns (uint,
-        string memory,
-        string memory,
-        string memory,
-        uint ,
-        uint ,
-        address ,
-        address [] memory) {
-
-        Package storage pack = packagenId[_id];    
-        return (pack.id, pack.name, pack.platform, pack.description, pack.duration, pack.price, pack.creator, pack.buyers);
-    }
+    function getPackage(uint _id) public view returns (Package memory) {
+        return packagenId[_id];
+    }  
 
 
     //function to check if an address is registered
@@ -266,36 +241,6 @@ contract LocalBuzz is ERC20{
         }
     }
 
-    // Function to get all clients of a creator
-    function getCreatorClients(address _creatorAddress) public view returns (address[] memory) {
-    // Get the list of package IDs created by the creator
-    uint[] memory packs = creatornAdd[_creatorAddress].packagesCreated;
-    
-    // Initialize a temporary dynamic array in memory to collect all buyers
-    uint totalBuyers = 0;
-    for (uint i = 0; i < packs.length; i++) {
-        totalBuyers += packagenId[packs[i]].buyers.length;
-    }
-    
-    address[] memory allClients = new address[](totalBuyers);
-    uint currentIndex = 0;
-    
-    // Loop through each package and add its buyers to the allClients array
-    for (uint i = 0; i < packs.length; i++) {
-        address[] memory buyers = packagenId[packs[i]].buyers;
-        for (uint j = 0; j < buyers.length; j++) {
-            allClients[currentIndex] = buyers[j];
-            currentIndex++;
-        }
-    }
-    
-    return allClients;
-}
-
-    //function to get all creator's packages
-    function getCreatorPackages(address _creatorAddress) public view returns (uint[] memory) {
-        return creatornAdd[_creatorAddress].packagesCreated;
-    }
 
     //function to check if an address is a client
     function isClient(address _address) public view returns (bool) {
@@ -321,9 +266,5 @@ contract LocalBuzz is ERC20{
         _;
     }
 
-    //modifier for only owner
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only Owner can perform the action");
-        _;
-    }
+   
 }

@@ -1,8 +1,8 @@
-export const contractAddress = "0x66986712FA8782d6f21BC4eF30000878BE9005fb";
+export const contractAddress = "0x0174c61d898D52eea251bAFaB76112f871834862";
 
 // "0x32Dd30a57A909290CF7127A77438dABE373a95a7";
 
-export const contractAbi =[
+export const contractAbi = [
   {
     "inputs": [],
     "stateMutability": "nonpayable",
@@ -187,63 +187,6 @@ export const contractAbi =[
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "_address",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "cUSDDeposited",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_address",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "cUSDSent",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_address",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "cUSDWithdrawn",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
         "internalType": "uint256",
         "name": "id",
         "type": "uint256"
@@ -414,6 +357,19 @@ export const contractAbi =[
       }
     ],
     "name": "packageCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "packageDeleted",
     "type": "event"
   },
   {
@@ -620,11 +576,11 @@ export const contractAbi =[
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_amount",
+        "name": "_id",
         "type": "uint256"
       }
     ],
-    "name": "depositcUSD",
+    "name": "deletePackage",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -963,25 +919,6 @@ export const contractAbi =[
         "type": "address"
       }
     ],
-    "name": "getCreatorClients",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "",
-        "type": "address[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_creatorAddress",
-        "type": "address"
-      }
-    ],
     "name": "getCreatorPackages",
     "outputs": [
       {
@@ -1004,44 +941,51 @@ export const contractAbi =[
     "name": "getPackage",
     "outputs": [
       {
-        "internalType": "uint256",
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "platform",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "duration",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "creator",
+            "type": "address"
+          },
+          {
+            "internalType": "address[]",
+            "name": "buyers",
+            "type": "address[]"
+          }
+        ],
+        "internalType": "struct LocalBuzz.Package",
         "name": "",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "address[]",
-        "name": "",
-        "type": "address[]"
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",
@@ -1099,16 +1043,22 @@ export const contractAbi =[
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
+    "inputs": [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
       }
     ],
-    "stateMutability": "view",
+    "name": "processPurchase",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1121,7 +1071,7 @@ export const contractAbi =[
     ],
     "name": "purchasePackage",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1134,7 +1084,7 @@ export const contractAbi =[
     ],
     "name": "redeemTokens",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1228,19 +1178,6 @@ export const contractAbi =[
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "sendcUSD",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "symbol",
     "outputs": [
@@ -1316,19 +1253,6 @@ export const contractAbi =[
         "type": "bool"
       }
     ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "withdrawcUSD",
-    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   }

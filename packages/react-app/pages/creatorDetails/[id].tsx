@@ -40,9 +40,9 @@ export default function CreatorDetails() {
   }
 
   interface PackageDetails {
-    packageId: bigint;
+    id: number;
     name: string;
-    price: bigint;
+    price: number;
     description: string;
     duration: number;
     platform: string;
@@ -70,11 +70,11 @@ export default function CreatorDetails() {
   const { data, refetch } = useReadContract({
     address: contractAddress,
     abi: contractAbi,
-    functionName: "getPackage",
+    functionName: "getPackages",
     args: [packageIds],
   });
 
-  const packdetails = (data as PackageDetails) || [];
+  const packdetails = (data as PackageDetails[]) || [];
 
   console.log(packdetails);
 
@@ -84,7 +84,7 @@ export default function CreatorDetails() {
     }
   }, [packdetails]);
 
-  async function Purchase() {
+  async function Purchase(id: number, amount: number) {
     if (!isConnected) {
       toast.error("Please connect wallet");
       return;
@@ -92,8 +92,8 @@ export default function CreatorDetails() {
 
     try {
       const isCheckoutProcessed = await processCheckout(
-        creatorAddress,
-        Number(packdetails?.price)
+        
+        Number(amount)
       );
 
       if (isCheckoutProcessed) {
@@ -101,7 +101,7 @@ export default function CreatorDetails() {
           address: contractAddress,
           abi: contractAbi,
           functionName: "purchasePackage",
-          args: [0],
+          args: [BigInt(Number(id))],
         });
 
         if (hash) {
@@ -186,8 +186,12 @@ export default function CreatorDetails() {
                     No Packages yet
                   </h1>
                 ) : (
-                  
-                      <div  className="rounded-2xl border border-orange-600 p-6 shadow-sm ring-1 ring-orange-600 sm:order-last sm:px-8 lg:p-12">
+                  packdetails?.map(
+                    (packdetail: PackageDetails, index: number) => (
+                      <div
+                        key={index}
+                        className="rounded-2xl border border-orange-600 p-6 shadow-sm ring-1 ring-orange-600 sm:order-last sm:px-8 lg:p-12"
+                      >
                         <div className="text-center">
                           <h2 className="text-lg font-medium text-gray-900">
                             <span className="sr-only"></span>
@@ -196,7 +200,7 @@ export default function CreatorDetails() {
                           <p className="mt-2 sm:mt-4">
                             <strong className="text-3xl font-bold text-gray-900 sm:text-4xl">
                               {" "}
-                              {Number(packdetails?.price) / 10 ** 18}{" "}
+                              {Number(packdetail.price) / 10 ** 18}{" "}
                             </strong>
 
                             <span className="text-base font-medium text-gray-700">
@@ -206,7 +210,7 @@ export default function CreatorDetails() {
                         </div>
 
                         <h1 className="text-center text-lg font-normal mt-2">
-                          {packdetails?.name}
+                          {packdetail.name}
                         </h1>
 
                         <ul className="mt-2 space-y-2">
@@ -228,7 +232,7 @@ export default function CreatorDetails() {
 
                             <span className="text-gray-700">
                               {" "}
-                              {packdetails?.description}{" "}
+                              {packdetail.description}{" "}
                             </span>
                           </li>
 
@@ -249,7 +253,7 @@ export default function CreatorDetails() {
                             </svg>
 
                             <span className="text-gray-700">
-                              {packdetails?.platform}
+                              {packdetail.platform}
                             </span>
                           </li>
 
@@ -270,18 +274,21 @@ export default function CreatorDetails() {
                             </svg>
 
                             <span className="text-gray-700">
-                              {Number(packdetails?.duration)} days
+                              {Number(packdetail.duration)} days
                             </span>
                           </li>
                         </ul>
                         <button
-                          onClick={Purchase}
+                          onClick={() =>
+                            Purchase(packdetail.id, packdetail.price)
+                          }
                           className="mt-8 block rounded-full border border-orange-600 bg-orange-600 px-12 py-3 text-center text-sm font-medium text-white hover:bg-orange-700 hover:ring-1 hover:ring-orange-700 focus:outline-none focus:ring active:text-orange-500"
                         >
                           Pay
                         </button>
                       </div>
-                    
+                    )
+                  )
                 )}
               </div>
             </div>

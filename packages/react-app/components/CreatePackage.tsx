@@ -30,7 +30,7 @@ const CreatePackage = () => {
           data.platforms as string,
           data.description as string,
           BigInt(Number(data.duration)),
-          BigInt(Number(data.price)),
+          BigInt(Math.floor(Number(data.price) * 10 ** 18)),
           
         ],
       });
@@ -122,7 +122,7 @@ const CreatePackage = () => {
               Price(in cUSD)
             </label>
             <input
-              type="number"
+              type="text"
               id="price"
               name="price"
               placeholder="price in cUSD"

@@ -7,7 +7,7 @@ import {
 import { contractAddress } from "./Contract";
 
 //transfer function
-export const processCheckout = async (addressTo : `0x${string}`, amount: number ) => {
+export const processCheckout = async ( amount: number ) => {
     if (window.ethereum) {
       const privateClient = createWalletClient({
         chain: celoAlfajores,
@@ -27,7 +27,7 @@ export const processCheckout = async (addressTo : `0x${string}`, amount: number 
           address: tokenAlfajoresContractAddress,
           abi: tokenAlfajoresAbi,
           functionName: "transfer",
-          args: [addressTo, BigInt(amount)],
+          args: [contractAddress, BigInt(amount)],
         });
 
         const checkoutTxnReceipt = await publicClient.waitForTransactionReceipt(

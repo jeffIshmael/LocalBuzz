@@ -1,8 +1,10 @@
-export const contractAddress = "0x0174c61d898D52eea251bAFaB76112f871834862";
+export const contractAddress = "0xc5ffB4b4BA0D7DA5613B0b3a97737771530aEAD7";
+
+// "0x0174c61d898D52eea251bAFaB76112f871834862";
 
 // "0x32Dd30a57A909290CF7127A77438dABE373a95a7";
 
-export const contractAbi = [
+export const contractAbi =[
   {
     "inputs": [],
     "stateMutability": "nonpayable",
@@ -752,6 +754,57 @@ export const contractAbi = [
   {
     "inputs": [
       {
+        "internalType": "address[]",
+        "name": "clientsAddresses",
+        "type": "address[]"
+      }
+    ],
+    "name": "getClients",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "username",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "walletAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "purchasedIds",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tokenBalance",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct LocalBuzz.Client[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_creatorAddress",
         "type": "address"
@@ -933,12 +986,12 @@ export const contractAbi = [
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
+        "internalType": "uint256[]",
+        "name": "ids",
+        "type": "uint256[]"
       }
     ],
-    "name": "getPackage",
+    "name": "getPackages",
     "outputs": [
       {
         "components": [
@@ -983,9 +1036,9 @@ export const contractAbi = [
             "type": "address[]"
           }
         ],
-        "internalType": "struct LocalBuzz.Package",
+        "internalType": "struct LocalBuzz.Package[]",
         "name": "",
-        "type": "tuple"
+        "type": "tuple[]"
       }
     ],
     "stateMutability": "view",
@@ -1040,25 +1093,6 @@ export const contractAbi = [
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-      }
-    ],
-    "name": "processPurchase",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

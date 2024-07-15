@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { contractAddress, contractAbi } from "@/config/Contract";
 
-const Purchased = () => {
+const CreatorContracts = () => {
   const { address } = useAccount();
   const { data } = useReadContract({
     address: contractAddress,
@@ -62,7 +62,7 @@ const Purchased = () => {
 
   return (
     <div>
-      <div className="w-full xl:w-8/12 mb-12 xl:mb-0  ml-2 mt-2">
+      <div className="w-full xl:w-8/12 mb-12 xl:mb-0   mt-24">
         <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded ">
           <div className="rounded-t mb-0 px-4 py-3 border-0">
             <div className="flex flex-wrap items-center">
@@ -97,14 +97,7 @@ const Purchased = () => {
               </thead>
 
               <tbody>
-              {myPurchasedIds.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="text-center py-4">
-                      You have not purchased any package.
-                    </td>
-                  </tr>
-                ) : (
-                PurchasedPackages?.map(
+                {PurchasedPackages?.map(
                   (PurchasedPackage: PackageDetails, index: number) => (
                     <tr key={index}>
                       <th className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left text-blueGray-700 ">
@@ -147,7 +140,7 @@ const Purchased = () => {
                       </td>
                     </tr>
                   )
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -157,4 +150,4 @@ const Purchased = () => {
   );
 };
 
-export default Purchased;
+export default CreatorContracts;

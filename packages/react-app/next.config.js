@@ -7,7 +7,17 @@ const nextConfig = {
       fs: false
     }
     return config
-  }
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+      },
+    ],
+
+    domains: ['ipfs.io'],
+  },
 }
 
 module.exports = nextConfig

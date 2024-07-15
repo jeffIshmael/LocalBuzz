@@ -92,8 +92,7 @@ contract LocalBuzz is ERC20{
 
     //function to register Client
     function registerClient(string memory _username, string memory _email) public {
-        require(!registered(msg.sender), "Already registered");
-        require(!isClient(msg.sender), "Already registered as content creator");
+        require(!registered(msg.sender), "Already registered"); 
         uint id = totalClients;
         Client memory newClient = Client(id, _username, _email, msg.sender, new uint[](0) , 0);
         clientnId[id] = newClient;
@@ -112,12 +111,10 @@ contract LocalBuzz is ERC20{
         string memory _facebookLink,
         string memory _linkedinLink,
         string memory _twitterLink,
-        
         string memory _tiktokLink,
         string memory _email
     ) public {
         require(!registered(msg.sender), "Already registered");
-        require(!isContentCreator(msg.sender), "Already registered as client");
         uint id = totalCreators;
         ContentCreator memory newCreator = ContentCreator(id, _fullname, _username, _bio, _instagramLink, _facebookLink, _linkedinLink, _twitterLink, _tiktokLink, new uint[](0) ,  msg.sender, _email);
         creatornId[id] = newCreator;
@@ -136,7 +133,7 @@ contract LocalBuzz is ERC20{
         uint _price
     ) public onlyCreator {
         uint id = totalPackages;
-        Package memory newPackage = Package(id, _name, _platform, _description, _duration, _price * 10 ** 18 , msg.sender, new address[](0));
+        Package memory newPackage = Package(id, _name, _platform, _description, _duration, _price , msg.sender, new address[](0));
         packagenId[id] = newPackage;
         packagenAdd[msg.sender] = newPackage;
         creatornAdd[msg.sender].packagesCreated.push(id);
@@ -152,7 +149,7 @@ contract LocalBuzz is ERC20{
         packagenId[_id].platform = _platform;
         packagenId[_id].description = _description;
         packagenId[_id].duration = _duration;
-        packagenId[_id].price = _price * 10 ** 18;
+        packagenId[_id].price = _price;
         emit packageEdited(_id, _name, _platform, _description, _duration, _price, msg.sender);
     }
 
@@ -168,14 +165,18 @@ contract LocalBuzz is ERC20{
         uint amount = packagenId[_id].price ;        
         clientnAdd[msg.sender].purchasedIds.push(_id);
         packagenId[_id].buyers.push(msg.sender); 
-        //get the BUZZ token of 10% on amount spent       
+        //get 5% of purchase amount as Buzz Token      
         rewardTokens(msg.sender, amount);
+        //pay the creator for the purchase
+        //cut 10% from the purchase amount as commission
+        uint commission = amount / 10;
+        require(cUSDToken.transfer(packagenId[_id].creator, amount - commission),"Failed to process payout");
         emit packagePurchased(_id, msg.sender, amount);
 
     }
     //function to reward tokens i.e Buzz
     function rewardTokens(address _clientAddress, uint _amount) internal {
-        uint tokenAmount = _amount / 10; // i.e 10% of the purchase amount in tokens
+        uint tokenAmount = _amount / 20; // i.e 5% of the purchase amount in tokens
         _mint(_clientAddress , tokenAmount);
         emit TokensRewarded(_clientAddress, tokenAmount);
     }
@@ -193,13 +194,11 @@ contract LocalBuzz is ERC20{
         return super.balanceOf(_client);
     }
 
-    //function to process purchase
-    function processPurchase(uint256 _id) public returns (bool) {
-        uint payout = packagenId[_id].price;
-        address receiver = packagenId[_id].creator;
-        require(cUSDToken.transfer(receiver, payout),"Failed to process payout");
-        return true;
-    }
+    // //function to process purchase
+    // function processPurchase( address _creator, uint _payout) public returns (bool) {
+    //     require(cUSDToken.transfer(_creator, _payout),"Failed to process payout");
+    //     return true;
+    // }
 
     //funcion to get all creators packages
     function getCreatorPackages(address _creatorAddress) public view returns (uint[] memory) {
@@ -226,10 +225,28 @@ contract LocalBuzz is ERC20{
         return creators;
     }
 
-    //function to get package from id
-    function getPackage(uint _id) public view returns (Package memory) {
-        return packagenId[_id];
-    }  
+    // Function to get packages from an array of IDs
+    function getPackages(uint[] memory ids) public view returns (Package[] memory) {
+        Package[] memory result = new Package[](ids.length);
+        
+        for (uint i = 0; i < ids.length; i++) {
+            result[i] = packagenId[ids[i]];
+        }
+        
+        return result;
+    }
+
+    //function to get clients from address array
+    function getClients(address [] memory clientsAddresses) public view returns (Client[] memory) {
+        Client[] memory result = new Client[](clientsAddresses.length);
+        
+        for (uint i = 0; i < clientsAddresses.length; i++) {
+            result[i] = clientnAdd[clientsAddresses[i]];
+        }
+        
+        return result;
+    }
+
 
 
     //function to check if an address is registered

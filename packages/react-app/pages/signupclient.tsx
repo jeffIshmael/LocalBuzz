@@ -6,10 +6,9 @@ import { toast } from "sonner";
 import Header from "@/components/Header";
 
 const SignUpAsCreator = () => {
-  
   const { isConnected } = useAccount();
   const router = useRouter();
-  const { writeContractAsync } = useWriteContract();
+  const { writeContractAsync, error, failureReason } = useWriteContract();
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -34,10 +33,25 @@ const SignUpAsCreator = () => {
         toast("successfully signed up");
         router.push("/");
       }
-    } catch (e: any) {
-      console.log(e);
-      toast.error("Failed to sign you up, try again.");
-      return;
+    } catch (e) {
+      if (error) {
+        if (error.message) {
+          console.log(error.message);
+          if (error.message.includes("already registered")) {
+            toast("Already registered");
+          } else if (
+            error.message.includes("already registered as content creator")
+          ) {
+            toast("Already registered as content creator");
+          } else {
+            toast("Failed to sign up, Try again.");
+          }
+        }
+        // console.log(error);
+
+        // toast.error(error.message);
+        return;
+      }
     }
   }
 
@@ -57,7 +71,7 @@ const SignUpAsCreator = () => {
         >
           <h1 className="text-center text-2xl font-bold">Sign Up as Client</h1>
           <form onSubmit={submit}>
-          <div style={{ marginBottom: "15px" }}>
+            <div style={{ marginBottom: "15px" }}>
               <label
                 htmlFor="username"
                 style={{ display: "block", marginBottom: "5px" }}
@@ -67,7 +81,7 @@ const SignUpAsCreator = () => {
               <input
                 type="text"
                 id="username"
-                name = "username"            
+                name="username"
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -87,8 +101,7 @@ const SignUpAsCreator = () => {
               <input
                 type="email"
                 id="email"
-                name= "email"
-                
+                name="email"
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -98,7 +111,7 @@ const SignUpAsCreator = () => {
                 required
               />
             </div>
-            
+
             <button
               type="submit"
               style={{

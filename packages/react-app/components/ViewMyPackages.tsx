@@ -1,10 +1,12 @@
 import React, { useEffect } from "react";
-import { useAccount, useReadContract } from "wagmi";
+import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { contractAddress, contractAbi } from "@/config/Contract";
 import Link from "next/link";
+import { toast } from "sonner";
 
 const ViewMyPackages = () => {
   const { address } = useAccount();
+  const {writeContractAsync , error} = useWriteContract();
   const { data: packsId } = useReadContract({
     address: contractAddress,
     abi: contractAbi,
@@ -41,23 +43,6 @@ const ViewMyPackages = () => {
     price: number;
   }
 
-  // const { data: packageDetailsData, refetch: refetchPackageDetails } = useReadContract({
-  //   address: contractAddress,
-  //   abi: contractAbi,
-  //   functionName: "getPackage",
-  //   args: [packageIds.map(p => p.id)],
-  //   // Ensure this only runs if there are package IDs
-  // });
-
-  // const packageDetails = (packageDetailsData as PackageDetails[]) || [];
-
-  // console.log(packageDetails);
-
-  // useEffect(() => {
-  //   if (packageIds.length > 0) {
-  //     refetchPackageDetails();
-  //   }
-  // }, [packageIds, refetchPackageDetails]);
 
   useEffect(() => {
     if (!packageDetails) {
@@ -68,6 +53,31 @@ const ViewMyPackages = () => {
     }
     console.log(packageDetails);
   }, [packageDetails]);
+
+  const handleDelete = async (id: number) => {
+    try {
+      const hash = await writeContractAsync({
+        address: contractAddress,
+        abi: contractAbi,
+        functionName: "deletePackage",
+        args: [id],
+      });
+      if (hash) {
+        toast(`successfully deleted ${packageDetails[id].name}`);
+        
+      }
+    } catch (e) {
+      if (error) {
+        if (error.message) {
+          toast("only the creator can delete.");
+        }
+        toast("Failed to delete.");
+        return;
+      }
+
+      toast("Failed to delete.");
+    }
+  };
 
   console.log(packageIds);
 
@@ -155,7 +165,7 @@ const ViewMyPackages = () => {
                               </span>
                               <span>Edit</span>
                             </button>
-                            <button className="text-slate-800 hover:text-blue-600 text-sm bg-white hover:bg-slate-100 border border-slate-200 rounded-r-lg font-medium px-4 py-2 inline-flex space-x-1 items-center">
+                            <button onClick={() => handleDelete(packageDetail.id)} className="text-slate-800 hover:text-blue-600 text-sm bg-white hover:bg-slate-100 border border-slate-200 rounded-r-lg font-medium px-4 py-2 inline-flex space-x-1 items-center">
                               <span>
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"

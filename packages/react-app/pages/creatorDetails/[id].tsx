@@ -91,10 +91,7 @@ export default function CreatorDetails() {
     }
 
     try {
-      const isCheckoutProcessed = await processCheckout(
-        
-        Number(amount)
-      );
+      const isCheckoutProcessed = await processCheckout(Number(amount));
 
       if (isCheckoutProcessed) {
         const hash = await writeContractAsync({
@@ -174,6 +171,82 @@ export default function CreatorDetails() {
           <p className="mt-8 text-gray-500">TikTok Influencer</p>
           <p className="mt-2 text-gray-500"></p>
         </div>
+        <br></br>
+        <div className="flex justify-center items-center">
+          <Link href={`${creator?.tiktokLink}`}>
+            <div className="relative">
+              <div className="flex items-center justify-center w-20 h-20 mx-2 overflow-hidden ">
+                <img src="/static/images/tiktok.png" width={50} height={50} />
+              </div>
+              <div>
+                <p className="flex justify-center font-bold tracking-wide ...">
+                  10K
+                </p>
+              </div>
+            </div>
+          </Link>
+
+          <Link href={`${creator?.instagramLink}`}>
+            <div className="relative">
+              <div className="flex items-center justify-center w-20 h-20 mx-2 overflow-hidden ">
+                <img src="https://1000logos.net/wp-content/uploads/2017/02/Instagram-Logo-tumb.png" />
+              </div>
+              <div>
+                <p className="flex justify-center font-bold tracking-wide ...">
+                  170.9K
+                </p>
+              </div>
+            </div>
+          </Link>
+
+          <Link href={`${creator?.linkedinLink}`}>
+            <div className="relative">
+              <div className="flex items-center justify-center w-20 h-20 mx-2 overflow-hidden ">
+                <img
+                  src="/static/images/youtube.png"
+                  width={100}
+                  height={100}
+                />
+              </div>
+              <div>
+                <p className="flex justify-center font-bold tracking-wide ...">
+                  7.2K
+                </p>
+              </div>
+            </div>
+          </Link>
+
+          <Link href={`${creator?.twitterLink}`}>
+            <div className="relative">
+              <div className="flex items-center justify-center w-20 h-20 mx-2 overflow-hidden ">
+                <img
+                  src="/static/images/twitter-x-logo-42562.png"
+                  width={50}
+                  height={50}
+                />
+              </div>
+              <div>
+                <p className="flex justify-center font-bold tracking-wide ...">
+                  34.8K
+                </p>
+              </div>
+            </div>
+          </Link>
+
+          <Link href={`${creator?.facebookLink}`}>
+            <div className="relative">
+              <div className="flex items-center justify-center w-20 h-20 mx-2 overflow-hidden ">
+                <img src="/static/images/facebook.png" width={50} height={50} />
+              </div>
+              <div>
+                <p className="flex justify-center font-bold tracking-wide ...">
+                  100K
+                </p>
+              </div>
+            </div>
+          </Link>
+        </div>
+
         <div className="mt-12 flex flex-col justify-center">
           <p className="text-gray-600 text-center font-light lg:px-16">
             {creator?.bio}
@@ -274,7 +347,7 @@ export default function CreatorDetails() {
                             </svg>
 
                             <span className="text-gray-700">
-                              {Number(packdetail.duration)} days
+                              {Number(packdetail.duration)} hours
                             </span>
                           </li>
                         </ul>

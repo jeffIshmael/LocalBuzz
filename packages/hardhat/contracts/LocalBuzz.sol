@@ -14,9 +14,10 @@ contract LocalBuzz is ERC20{
     IERC20 public cUSDToken;
        
     // address public cUSDTokenAddress = // 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1
+    // 0x765DE816845861e75A25fCA122bb6898B8B1282a //mainnet
     constructor() ERC20("LocalBuzz", "BUZZ") {
     
-    cUSDToken = IERC20(0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1);
+    cUSDToken = IERC20(0x765DE816845861e75A25fCA122bb6898B8B1282a);
     
     }
 
@@ -194,11 +195,7 @@ contract LocalBuzz is ERC20{
         return super.balanceOf(_client);
     }
 
-    // //function to process purchase
-    // function processPurchase( address _creator, uint _payout) public returns (bool) {
-    //     require(cUSDToken.transfer(_creator, _payout),"Failed to process payout");
-    //     return true;
-    // }
+  
 
     //funcion to get all creators packages
     function getCreatorPackages(address _creatorAddress) public view returns (uint[] memory) {

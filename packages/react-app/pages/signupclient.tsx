@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { contractAddress, contractAbi } from "../config/Contract";
 import { useWriteContract, useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
@@ -14,13 +14,10 @@ const SignUpAsCreator = () => {
     e.preventDefault();
     if (!isConnected) {
       toast.error("Please connect wallet");
-      console.log("Please connect wallet");
       return;
     }
     const formData = new FormData(e.target as HTMLFormElement);
     const data = Object.fromEntries(formData.entries());
-    console.log(data);
-
     try {
       const hash = await writeContractAsync({
         address: contractAddress,
@@ -29,29 +26,19 @@ const SignUpAsCreator = () => {
         args: [data.username as string, data.email as string],
       });
       if (hash) {
-        console.log(hash);
         toast("successfully signed up");
-        router.push("/");
+        router.push("/dashboard");
       }
     } catch (e) {
       if (error) {
         if (error.message) {
-          console.log(error.message);
-          if (error.message.includes("already registered")) {
-            toast("Already registered");
-          } else if (
-            error.message.includes("already registered as content creator")
-          ) {
-            toast("Already registered as content creator");
-          } else {
-            toast("Failed to sign up, Try again.");
-          }
+          toast("You are already registered.");
         }
-        // console.log(error);
-
-        // toast.error(error.message);
+        toast("Failed to sign up");
         return;
       }
+
+      toast("Failed to sign up");
     }
   }
 

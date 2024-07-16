@@ -1,31 +1,23 @@
 import React, { useState } from "react";
-
 import { contractAddress, contractAbi } from "../config/Contract";
 import { useWriteContract, useAccount, useConnect } from "wagmi";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 
-
 const SignUpAsCreator = () => {
- 
-  
   const { isConnected } = useAccount();
   const router = useRouter();
-  const { writeContractAsync } = useWriteContract();
-
- 
+  const { writeContractAsync, error } = useWriteContract();
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!isConnected) {
       toast.error("Please connect wallet");
-      console.log("Please connect wallet");
       return;
     }
     const formData = new FormData(e.target as HTMLFormElement);
     const data = Object.fromEntries(formData.entries());
-    console.log(data);
 
     try {
       const hash = await writeContractAsync({
@@ -38,7 +30,7 @@ const SignUpAsCreator = () => {
           data.bio as string,
           data.instagramLink as string,
           data.facebookLink as string,
-          data.linkedinLink as string,
+          data.youtubeLink as string,
           data.twitterLink as string,
           data.tiktokLink as string,
           data.email as string,
@@ -47,12 +39,18 @@ const SignUpAsCreator = () => {
       if (hash) {
         console.log(hash);
         toast("successfully signed up");
-        router.push("/");
+        router.push("/dashboard");
       }
-    } catch (e: any) {
-      console.log(e);
-      toast.error("Failed to sign you up, try again.");
-      return;
+    } catch (e) {
+      if (error) {
+        if (error.message) {
+          toast("You are already registered.");
+        }
+        toast("Failed to sign up");
+        return;
+      }
+
+      toast("Failed to sign up");
     }
   }
 
@@ -84,8 +82,6 @@ const SignUpAsCreator = () => {
                 type="text"
                 id="fullname"
                 name="fullname"
-                // value={fullname}
-                // onChange={(e) => setFullname(e.target.value)}
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -105,9 +101,7 @@ const SignUpAsCreator = () => {
               <input
                 type="text"
                 id="username"
-                name = "username"
-                // value={username}
-                // onChange={(e) => setUsername(e.target.value)}
+                name="username"
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -126,9 +120,7 @@ const SignUpAsCreator = () => {
               </label>
               <textarea
                 id="bio"
-                name = "bio"
-                // value={bio}
-                // onChange={(e) => setBio(e.target.value)}
+                name="bio"
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -148,9 +140,7 @@ const SignUpAsCreator = () => {
               <input
                 type="url"
                 id="instagramLink"
-                name = "instagramLink"
-                // value={instagramLink}
-                // onChange={(e) => setInstagramLink(e.target.value)}
+                name="instagramLink"
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -169,9 +159,7 @@ const SignUpAsCreator = () => {
               <input
                 type="url"
                 id="facebookLink"
-                name = "facebookLink"
-                // value={facebookLink}
-                // onChange={(e) => setFacebookLink(e.target.value)}
+                name="facebookLink"
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -182,17 +170,15 @@ const SignUpAsCreator = () => {
             </div>
             <div style={{ marginBottom: "15px" }}>
               <label
-                htmlFor="linkedinLink"
+                htmlFor="youtubeLink"
                 style={{ display: "block", marginBottom: "5px" }}
               >
-                LinkedIn Link
+                Youtube Link
               </label>
               <input
                 type="url"
-                id="linkedinLink"
-                name = "linkedinLink"
-                // value={linkedinLink}
-                // onChange={(e) => setLinkedinLink(e.target.value)}
+                id="youtubeLink"
+                name="youtubeLink"
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -211,9 +197,7 @@ const SignUpAsCreator = () => {
               <input
                 type="url"
                 id="twitterLink"
-                name = "twitterLink"
-                // value={twitterLink}
-                // onChange={(e) => setTwitterLink(e.target.value)}
+                name="twitterLink"
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -232,9 +216,7 @@ const SignUpAsCreator = () => {
               <input
                 type="url"
                 id="tiktokLink"
-                name = "tiktokLink"
-                // value={tiktokLink}
-                // onChange={(e) => setTiktokLink(e.target.value)}
+                name="tiktokLink"
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -253,9 +235,7 @@ const SignUpAsCreator = () => {
               <input
                 type="email"
                 id="email"
-                name = "email"
-                // value={email}
-                // onChange={(e) => setEmail(e.target.value)}
+                name="email"
                 style={{
                   width: "100%",
                   padding: "8px",

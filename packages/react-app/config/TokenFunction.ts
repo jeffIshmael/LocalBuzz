@@ -5,6 +5,7 @@ import {
   tokenAlfajoresContractAddress,
 } from "@/Blockchain/Abi/TokenAlfajores";
 import { contractAddress } from "./Contract";
+import { toast } from "sonner";
 
 //transfer function
 export const processCheckout = async ( amount: number ) => {
@@ -43,6 +44,7 @@ export const processCheckout = async ( amount: number ) => {
         return false;
       } catch (error) {
         console.log(error);
+        toast("Transaction failed, make sure you have enough balance");
         return false;
       }
     }

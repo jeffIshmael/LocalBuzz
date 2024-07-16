@@ -55,10 +55,6 @@ export default function Home() {
               </div>
             </div>
             <div className="mt-16 ml-6 sm:mt-24 lg:mt-0 lg:col-span-5">
-              {/* <p className="text-base ml-12 text-gray-600 sm:text-xl lg:text-lg xl:text-xl">
-                LocalBuzz: Connect with local influencers and amplify your brand
-                reach today!"
-              </p> */}
               <div className="mt-12 ml-8">
                 <div className="grid grid-cols-3 gap-6 sm:gap-6 xl:gap-8">
                   <div className="text-center sm:flex sm:items-center sm:justify-center">
@@ -70,8 +66,6 @@ export default function Home() {
                         <p className="text-4xl font-bold text-gray-900">16K+</p>
                       </div>
                     </div>
-                    {/* <!-- <div className="mt-3 sm:mt-0 sm:ml-3">
-                      </div> --> */}
                   </div>
                   <div className="text-center sm:flex sm:items-center sm:justify-center">
                     <div className="sm:flex-shrink-0">
@@ -84,8 +78,6 @@ export default function Home() {
                         </p>
                       </div>
                     </div>
-                    {/* <!-- <div className="mt-3 sm:mt-0 sm:ml-3">
-                    </div> --> */}
                   </div>
                   <div className="text-center sm:flex sm:items-center sm:justify-center">
                     <div className="sm:flex-shrink-0">
@@ -98,8 +90,6 @@ export default function Home() {
                         </p>
                       </div>
                     </div>
-                    {/* <!-- <div className="mt-3 sm:mt-0 sm:ml-3">
-                    </div> --> */}
                   </div>
                 </div>
               </div>

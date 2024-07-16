@@ -114,83 +114,71 @@ const Explore = () => {
                             {creator.bio}
                           </p>
                           <div className="w-full flex justify-center pt-5 pb-5">
-                            <Link
-                              href={`${creator.tiktokLink}`}
-                              className="mx-5"
-                            >
-                              <div aria-label="Tiktok" role="img">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="24"
-                                  height="24"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="#718096"
-                                  strokeWidth="1.5"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  className="feather feather-tiktok"
-                                >
-                                  <path d="M12 2v3.25a7 7 0 0 0 4.906 6.717 7.5 7.5 0 1 1-6.906-6.406V9a4.5 4.5 0 1 0 3 4.065V2h-1z" />
-                                </svg>
-                              </div>
-                            </Link>
-                            <Link
-                              href={`${creator.twitterLink}`}
-                              className="mx-5"
-                            >
-                              <div aria-label="Twitter" role="img">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="24"
-                                  height="24"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="#718096"
-                                  strokeWidth="1.5"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  className="feather feather-twitter"
-                                >
-                                  <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
-                                </svg>
-                              </div>
-                            </Link>
-                            <Link
-                              href={`${creator.instagramLink}`}
-                              className="mx-5"
-                            >
-                              <div aria-label="Instagram" role="img">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="24"
-                                  height="24"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="#718096"
-                                  strokeWidth="1.5"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  className="feather feather-instagram"
-                                >
-                                  <rect
-                                    x="2"
-                                    y="2"
-                                    width="20"
-                                    height="20"
-                                    rx="5"
-                                    ry="5"
-                                  ></rect>
-                                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                                  <line
-                                    x1="17.5"
-                                    y1="6.5"
-                                    x2="17.51"
-                                    y2="6.5"
-                                  ></line>
-                                </svg>
-                              </div>
-                            </Link>
+                            <div className="flex justify-center items-center">
+                              <Link href={`${creator.tiktokLink}`}>
+                                <div className="relative">
+                                  <div className="flex items-center justify-center w-15 h-15 mx-2 overflow-hidden">
+                                    <img src="/static/images/tiktok.png" width={80} height={80}/>
+                                  </div>
+                                  <div>
+                                    <p className="flex justify-center font-bold tracking-wide ...">
+                                      10K
+                                    </p>
+                                  </div>
+                                </div>
+                              </Link>
+
+                              <Link href={`${creator.instagramLink}`}>
+                                <div className="relative">
+                                  <div className="flex items-center justify-center w-15 h-15 mx-2 overflow-hidden ">
+                                    <img src="https://1000logos.net/wp-content/uploads/2017/02/Instagram-Logo-tumb.png" width={120} height={120}/>
+                                  </div>
+                                  <div>
+                                    <p className="flex justify-center font-bold tracking-wide ...">
+                                      170.9K
+                                    </p>
+                                  </div>
+                                </div>
+                              </Link>
+
+                              <Link href={`${creator.linkedinLink}`}>
+                                <div className="relative">
+                                  <div className="flex items-center justify-center w-15 h-15 mx-2 overflow-hidden ">
+                                    <img src="/static/images/youtube.png" width={100} height={100} />
+                                  </div>
+                                  <div>
+                                    <p className="flex justify-center font-bold tracking-wide ...">
+                                      7.2K
+                                    </p>
+                                  </div>
+                                </div>
+                              </Link>
+
+                              <Link href={`${creator.twitterLink}`}>
+                                <div className="relative">
+                                  <div className="flex items-center justify-center w-15 h-15 mx-2 overflow-hidden">
+                                    <img src="/static/images/twitter-x-logo-42562.png" width={70} height={70} />
+                                  </div>
+                                  <div>
+                                    <p className="flex justify-center font-bold tracking-wide ...">
+                                      34.8K
+                                    </p>
+                                  </div>
+                                </div>
+                              </Link>
+                              <Link href={`${creator.facebookLink}`}>
+                                <div className="relative">
+                                  <div className="flex items-center justify-center w-15 h-15 mx-2 overflow-hidden  ">
+                                    <img src="/static/images/facebook.png" width={70} height={70}/>
+                                  </div>
+                                  <div>
+                                    <p className="flex justify-center font-bold tracking-wide ...">
+                                      100K
+                                    </p>
+                                  </div>
+                                </div>
+                              </Link>
+                            </div>
                           </div>
                           <Link href={`/creatorDetails/${index}`} key={index}>
                             <div className="border-2 border-orange-500 text-center rounded-lg px-3 py-2 text-yellow-400 cursor-pointer hover:bg-orange-500 hover:text-yellow-200">

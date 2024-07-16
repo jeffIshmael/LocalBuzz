@@ -20,7 +20,7 @@ describe("LocalBuzz", function () {
     it("Should register a client", async function () {
         await expect(localBuzz.connect(addr1).registerClient("ClientUser", "client@example.com"))
             .to.emit(localBuzz, "clientRegistered")
-            .withArgs(0, "ClientUser", "client@example.com", addr1.address, [], 0);
+            .withArgs(0, "ClientUser", "client@gmail.com", addr1.address, [], 0);
         
         const client = await localBuzz.getClient(addr1.address);
         expect(client.username).to.equal("ClientUser");

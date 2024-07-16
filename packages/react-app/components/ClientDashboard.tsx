@@ -72,7 +72,7 @@ const ClientDashboard = () => {
         });
 
         if (hash) {
-          toast.success(`successfully redeemed to ${Number(token) / 10 ** 18}cUSD`);
+          toast.success(`successfully redeemed for ${Number(token) / 10 ** 18}cUSD`);
         }
       } else {
         console.log(error);

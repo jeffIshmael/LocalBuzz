@@ -2,14 +2,26 @@ import { Disclosure } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useEffect, useState } from "react";
-import { useConnect, useAccount } from "wagmi";
+import { useConnect, useAccount, useReadContract } from "wagmi";
 import { injected } from "wagmi/connectors";
 import Link from "next/link";
+import { contractAbi, contractAddress } from "@/config/Contract";
 
 export default function Header() {
   const [hideConnectBtn, setHideConnectBtn] = useState(false);
   const { connect } = useConnect();
-  const { isConnected } = useAccount();
+  const { isConnected , address} = useAccount();
+  const [isRegistered, setIsRegistered] = useState(false);
+
+  const { data, refetch } = useReadContract({
+    address: contractAddress,
+    abi: contractAbi,
+    functionName: "registered",
+    args: [address],
+  });
+
+  const registered = (data as boolean);
+
 
   useEffect(() => {
     if (window.ethereum && window.ethereum.isMiniPay) {
@@ -17,6 +29,16 @@ export default function Header() {
       connect({ connector: injected({ target: "metaMask" }) });
     }
   }, []);
+
+  useEffect(() => {
+    if (!data) {
+      async () =>{
+        await refetch();
+        setIsRegistered(registered);
+      }
+    } setIsRegistered(registered);
+  }, [data]);
+
 
   return (
     <Disclosure as="nav" className="bg-gray-400 bg-opacity-50 ">
@@ -62,14 +84,14 @@ export default function Header() {
                   >
                     Explore
                   </Link>
-                  {isConnected && (
+                  {isConnected && isRegistered ? (
                     <Link
                       href="/dashboard"
                       className="inline-flex items-center  px-1 pt-1 text-sm font-medium text-gray-900"
                     >
                       Dashboard
                     </Link>
-                  )}
+                  ): null}
                 </div>
               </div>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
@@ -94,13 +116,13 @@ export default function Header() {
               >
                 Home
               </Disclosure.Button>
-              <Disclosure.Button
+              {isRegistered && (<Disclosure.Button
                 as="a"
                 href="/dashboard"
                 className="block border-l-4 border-black py-2 pl-3 pr-4 text-base font-medium text-black"
               >
                 Dashboard
-              </Disclosure.Button>
+              </Disclosure.Button>)}
               <Disclosure.Button
                 as="a"
                 href="/explore"

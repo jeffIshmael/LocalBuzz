@@ -22,7 +22,14 @@ const CreatorDashboard = () => {
     args: [address],
   });
 
-  const creators = (data as Creator) || [];
+  console.log(data);
+
+  const {data: creatorpacks} = useReadContract({
+    address: contractAddress,
+    abi: contractAbi,
+    functionName: "getContentCreator",
+    args: [address],
+  });
 
   interface Creator {
     bio: string;
@@ -32,11 +39,18 @@ const CreatorDashboard = () => {
     id: number;
     instagramLink: string;
     linkedinLink: string;
+    packagesCreated
+: 
+[];
     tiktokLink: string;
     twitterLink: string;
     username: string;
     walletAddress: string;
   }
+
+  const creators = (data as Creator) || [];
+
+ 
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -257,7 +271,7 @@ const CreatorDashboard = () => {
               <div className="flex justify-between mb-6">
                 <div>
                   <div className="flex items-center mb-1">
-                    <div className="text-2xl font-semibold">2</div>
+                    <div className="text-2xl font-semibold">{creators.packagesCreated?.length}</div>
                   </div>
                   <div className="text-sm font-medium text-gray-400">
                     Marketing Packages
@@ -269,7 +283,7 @@ const CreatorDashboard = () => {
               <div className="flex justify-between mb-4">
                 <div>
                   <div className="flex items-center mb-1">
-                    <div className="text-2xl font-semibold">10</div>
+                    <div className="text-2xl font-semibold">{creators.packagesCreated?.length}</div>
                     <div className="p-1 rounded bg-emerald-500/10 text-emerald-500 text-[12px] font-semibold leading-none ml-2"></div>
                   </div>
                   <div className="text-sm font-medium text-gray-400">
@@ -282,7 +296,7 @@ const CreatorDashboard = () => {
             <div className="bg-white rounded-md border border-gray-100 p-6 shadow-md shadow-black/5">
               <div className="flex justify-between mb-6">
                 <div>
-                  <div className="text-2xl font-semibold mb-1">100</div>
+                  <div className="text-2xl font-semibold mb-1">0</div>
                   <div className="text-sm font-medium text-gray-400">
                     Completed Contracts
                   </div>

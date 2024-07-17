@@ -1,6 +1,7 @@
-export const contractAddress = "0x88739B7a10A11F83a47381F1FD33d20C011E58Bf";
+export const contractAddress = "0x32Dd30a57A909290CF7127A77438dABE373a95a7";
 // ("0x7058c0145461463e3b8E4deF9AEdd418a1EBaDD4"); //mainnet
 // 0x88739B7a10A11F83a47381F1FD33d20C011E58Bf //mainnet with cUSD
+// 0x32Dd30a57A909290CF7127A77438dABE373a95a7 //mainnet with withdraw 
 // "0xc5ffB4b4BA0D7DA5613B0b3a97737771530aEAD7" //testnet
 export const contractAbi = [
   {
@@ -180,6 +181,25 @@ export const contractAbi = [
       }
     ],
     "name": "Transfer",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_clientAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "amountWithdrawn",
     "type": "event"
   },
   {
@@ -1094,6 +1114,19 @@ export const contractAbi = [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -1285,6 +1318,19 @@ export const contractAbi = [
         "type": "bool"
       }
     ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_address",
+        "type": "address"
+      }
+    ],
+    "name": "withdraw",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   }

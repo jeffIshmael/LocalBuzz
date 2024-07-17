@@ -92,7 +92,7 @@ const Explore = () => {
                         <div className="absolute -mt-20 w-full flex justify-center">
                           <div className="h-32 w-32">
                             <Image
-                              src={`https://ipfs.io/ipfs/QmXyFKsktSW3iR66rAi8vwAeF6xnWLB8LFvWNN9rtwRmTV/${Number(
+                              src={`https://ipfs.io/ipfs/QmYCkL2Z9zN88hhBQbDmqqi7kHCpASabjtLCNnLbCicWMQ/${Number(
                                 creator.id
                               ).toString()}.jpg`}
                               alt="Display Picture of Andres Berlin"

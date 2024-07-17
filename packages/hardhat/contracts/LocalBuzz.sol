@@ -12,11 +12,13 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract LocalBuzz is ERC20{
 
     IERC20 public cUSDToken;
+    address public owner;
        
     // address public cUSDTokenAddress = // 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1
     // 0x765DE816845861e75A25fCA122bb6898B8B1282a //mainnet
     constructor() ERC20("LocalBuzz", "BUZZ") {
-    
+
+    owner = msg.sender;
     cUSDToken = IERC20(0x765DE816845861e75A25fCA122bb6898B8B1282a);
     
     }
@@ -90,6 +92,8 @@ contract LocalBuzz is ERC20{
     event TokensRedeemed(address , uint TokenAmount);
     event packageDeleted(uint id);
     event packageEdited(uint id, string name, string platform, string description, uint duration, uint price, address creator);
+    event amountWithdrawn(address _clientAddress, uint _amount);
+
 
     //function to register Client
     function registerClient(string memory _username, string memory _email) public {
@@ -279,6 +283,18 @@ contract LocalBuzz is ERC20{
         require(isContentCreator(msg.sender), "Only Creator");
         _;
     }
+
+    //function to withdraw from the contract
+   function withdraw(address _address) public onlyOwner {
+       cUSDToken.transfer(_address, cUSDToken.balanceOf(address(this)));
+       emit amountWithdrawn(_address, cUSDToken.balanceOf(address(this)));
+   }
+
+   //modifier of only owner
+   modifier onlyOwner() {
+       require(msg.sender == owner, "Only owner");
+       _;
+   }
 
    
 }

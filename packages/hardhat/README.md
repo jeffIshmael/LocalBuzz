@@ -1,23 +1,8 @@
-# Celo Composer | Hardhat
+## LocalBuzz smart Contract
 
-## How to use
+<ul>
+<li><a href="https://celoscan.io/address/0x32Dd30a57A909290CF7127A77438dABE373a95a7#code">Mainnet</a></li>
+<li><a href="https://alfajores.celoscan.io/address/0xE11E029eFc6bB08DdF9Ecdc4af6d1047F9488A20#code">Testnet</a></li>
+</ul>
 
-1. Create a copy of `.env.example` and rename it to `.env`.
 
-2. For Deploying you will need `PRIVATE_KEY` set in `.env`.
-
-3. For verification you will need [Celoscan API Key](https://celoscan.io/myapikey) `CELOSCAN_API_KEY` set in `.env`.
-
-For Alfajores (Testnet) Verification
-
-```bash
-npx hardhat verify [CONTRACT_ADDRESS] [...CONSTRUCTOR_ARGS] --network alfajores
-```
-
-For Mainnet Verification
-
-```bash
-npx hardhat verify [CONTRACT_ADDRESS] [...CONSTRUCTOR_ARGS] --network celo
-```
-
-Check the file `hardhat.config.js` for Celo specific hardhat configuration.
